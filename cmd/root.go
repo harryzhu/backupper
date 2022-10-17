@@ -5,11 +5,14 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"errors"
+	//"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
+	"path/filepath"
 	"sqlconf"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -35,7 +38,7 @@ var rootCmd = &cobra.Command{
 		config.Refresh().Print()
 
 		logger.Info("===== start =====", zap.String("time", strconv.FormatInt(globalTimeStart, 10)))
-		logger.Error("ddd", zap.Error(errors.New("error test")))
+		//logger.Error("ddd", zap.Error(errors.New("error test")))
 
 		prepareURLFileList(config.ToString("url_list"))
 
@@ -46,8 +49,21 @@ var rootCmd = &cobra.Command{
 
 	},
 	PersistentPostRun: func(cmd *cobra.Command, args []string) {
-
 		config.Close()
+		curErrorLog := sqlconf.CurrentErrorLog
+		logger.Info("curErrorLog", zap.String("curErrorLog", curErrorLog))
+
+		if fi, err := os.Stat(curErrorLog); err == nil {
+			if fi.Size() > 16 {
+				cnt, err := ioutil.ReadFile(curErrorLog)
+				if err == nil {
+					mSubject := "[ERROR].[RUNNING]:" + filepath.Base(curErrorLog)
+					mBody := strings.Join([]string{curErrorLog, "<br/><br/>", "<pre>", string(cnt), "</pre>"}, "")
+					config.Mail.WithMessage(mSubject, mBody).SendMailStartTLS()
+				}
+
+			}
+		}
 
 		globalTimeStop = time.Now().Unix()
 		logger.Info("===== end(total duration) =====", zap.String("second", strconv.FormatInt(globalTimeStop-globalTimeStart, 10)))
@@ -105,6 +121,8 @@ func bootConfig() {
 	config.FatalEmpty([]string{"url_list", "dir_save_root"})
 
 	config.SetLogger(config.ToString("app_logs_dir"), config.ToString("app_name"))
+	config.SetMail()
+
 	logger = config.Logger
 	logger.Info("Thank you for choosing " + config.ToString("app_name"))
 
