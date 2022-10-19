@@ -1,9 +1,10 @@
 package cmd
 
 import (
+	"sqlconf"
 	//"fmt"
 	"io"
-	"io/ioutil"
+	//"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
@@ -46,14 +47,14 @@ func urlToSavePath(URL string) (savePath string) {
 	savePath = filepath.Join(DirSaveRoot, u_host, uPath2)
 	saveDir := filepath.Dir(savePath)
 
-	makeDirs(saveDir)
+	sqlconf.MakeDirs(saveDir)
 
 	//logger.Info("urlToSavePath:", zap.String("url", URL), zap.String("savePath", savePath))
 	return savePath
 }
 
 func prepareURLFileList(URL string) error {
-	lst, err := getURL(URL)
+	lst, err := sqlconf.GetURLContent(URL)
 	if err != nil {
 		logger.Error("prepareURLFileList", zap.Error(err))
 		return err
@@ -91,10 +92,11 @@ func DownloadFile(URL string, localPath string, withProgress bool) error {
 			}
 		} else {
 			logger.Info("DownloadFile",
-				zap.String("SKIP download", localPath),
-				zap.String("is-overwirite", "true"),
+				zap.String("action", "SKIP"),
+				zap.Bool("is-overwrite", IsOverwrite),
 				zap.Int64("size", fi.Size()),
 				zap.String("last-modified", fi.ModTime().String()),
+				zap.String("localPath", localPath),
 			)
 			return nil
 		}
@@ -149,35 +151,6 @@ func DownloadFile(URL string, localPath string, withProgress bool) error {
 		zap.Int64("content-length", resp.ContentLength),
 		zap.String("duration", strconv.FormatInt(timeStop-timeStart, 10)))
 
-	return nil
-}
-
-func getURL(URL string) (cnt string, err error) {
-	resp, err := http.Get(URL)
-	if err != nil {
-		logger.Error("getURL", zap.String("url", URL), zap.Error(err))
-		return "", err
-	}
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		logger.Error("getURL, reading body", zap.String("url", URL), zap.Error(err))
-		return "", err
-	}
-
-	return string(body), nil
-}
-
-func makeDirs(p string) error {
-	if _, err := os.Stat(p); err != nil {
-		err := os.MkdirAll(p, os.ModePerm)
-		if err != nil {
-			logger.Error("cannot make dir:"+p, zap.Error(err))
-			return err
-		} else {
-			os.Chmod(p, os.ModePerm)
-		}
-	}
 	return nil
 }
 
