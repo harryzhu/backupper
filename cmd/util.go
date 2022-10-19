@@ -81,21 +81,21 @@ func prepareURLFileList(URL string) error {
 
 func DownloadFile(URL string, localPath string, withProgress bool) error {
 	timeStart := time.Now().Unix()
-	// logger.Info("DownloadFile:begin",
-	// 	zap.String("url", URL),
-	// 	zap.String("localPath", localPath),
-	// 	zap.String("time-start", strconv.FormatInt(timeStart, 10)))
 
-	_, err := os.Stat(localPath)
+	fi, err := os.Stat(localPath)
 
 	if err == nil {
 		if IsOverwrite == true {
-			err = os.Remove(localPath)
-			if err != nil {
+			if err = os.Remove(localPath); err != nil {
 				logger.Error("DownloadFile: error(os-remove)", zap.String("cannot delete file", localPath), zap.Error(err))
 			}
 		} else {
-			logger.Info("DownloadFile", zap.String("SKIP download", localPath), zap.String("is_overwirite", "true"))
+			logger.Info("DownloadFile",
+				zap.String("SKIP download", localPath),
+				zap.String("is-overwirite", "true"),
+				zap.Int64("size", fi.Size()),
+				zap.String("last-modified", fi.ModTime().String()),
+			)
 			return nil
 		}
 	}
@@ -118,7 +118,11 @@ func DownloadFile(URL string, localPath string, withProgress bool) error {
 	defer fileTemp.Close()
 
 	if withProgress == true {
-		bar := config.SetBar(resp.ContentLength, "downloading").Bar
+		var contentLength int64 = -1
+		if resp.ContentLength > 0 {
+			contentLength = resp.ContentLength
+		}
+		bar := config.SetBar(contentLength, "downloading").Bar
 		_, err = io.Copy(io.MultiWriter(fileTemp, bar), resp.Body)
 		bar.Finish()
 	} else {
