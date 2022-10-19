@@ -48,7 +48,7 @@ func urlToSavePath(URL string) (savePath string) {
 
 	makeDirs(saveDir)
 
-	logger.Info("urlToSavePath:", zap.String("url", URL), zap.String("original-path", uPath), zap.String("filepathify-path", uPath2), zap.String("saveDir", saveDir), zap.String("savePath", savePath))
+	logger.Info("urlToSavePath:", zap.String("url", URL), zap.String("savePath", savePath))
 	return savePath
 }
 
@@ -59,7 +59,7 @@ func prepareURLFileList(URL string) error {
 		return err
 	}
 
-	logger.Info("prepareURLFileList", zap.String("url content", lst))
+	logger.Info("prepareURLFileList", zap.String("url", URL))
 	lst = strings.ReplaceAll(lst, "\r\n", "\n")
 	arrList := strings.Split(lst, "\n")
 	//fmt.Println(arrList)
@@ -221,6 +221,11 @@ func StartMultiDownload() error {
 
 	wg := sync.WaitGroup{}
 	var runningQueue int = 0
+
+	if len(URLFileList) <= BatchSize {
+		BatchSize = len(URLFileList)
+	}
+	logger.Info("StartMultiDownload", zap.Int("batch-size", BatchSize), zap.Int("task-count", len(URLFileList)))
 
 	for u, f := range URLFileList {
 		logger.Info("start download", zap.String("url", u), zap.String("localPath", f))
