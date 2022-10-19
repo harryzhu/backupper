@@ -10,7 +10,6 @@ import (
 	//"io/ioutil"
 	"os"
 	//"path/filepath"
-	"sqlconf"
 	"strconv"
 
 	//"strings"
@@ -21,12 +20,8 @@ import (
 )
 
 var (
-	ts_now int64         = time.Now().Unix()
-	config *sqlconf.Conf = sqlconf.Config
-
 	globalTimeStart int64
 	globalTimeStop  int64
-	logger          *zap.Logger
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -46,7 +41,7 @@ var rootCmd = &cobra.Command{
 		//fmt.Println(URLFileList)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-
+		config.Refresh().Print()
 	},
 	PersistentPostRun: func(cmd *cobra.Command, args []string) {
 		config.Close()
@@ -69,11 +64,8 @@ func Execute() {
 }
 
 func init() {
+	bootConfig()
 
-	logger = config.SetLogger().Logger.ZapLogger
 	logger.Info("Thank you for choosing " + config.ToString("app_name"))
-
-	config.SetMail()
-
 	DirSaveRoot = config.ToString("dir_save_root")
 }

@@ -19,8 +19,8 @@ import (
 )
 
 var (
-	IsOverwrite bool = true
-	BatchSize   int  = 3
+	IsOverwrite bool
+	BatchSize   int = 3
 	DirSaveRoot string
 	URLFileList map[string]string = make(map[string]string, 10)
 )
@@ -48,7 +48,7 @@ func urlToSavePath(URL string) (savePath string) {
 
 	makeDirs(saveDir)
 
-	logger.Info("urlToSavePath:", zap.String("url", URL), zap.String("savePath", savePath))
+	//logger.Info("urlToSavePath:", zap.String("url", URL), zap.String("savePath", savePath))
 	return savePath
 }
 
@@ -81,10 +81,10 @@ func prepareURLFileList(URL string) error {
 
 func DownloadFile(URL string, localPath string, withProgress bool) error {
 	timeStart := time.Now().Unix()
-	logger.Info("DownloadFile:begin",
-		zap.String("url", URL),
-		zap.String("localPath", localPath),
-		zap.String("time-start", strconv.FormatInt(timeStart, 10)))
+	// logger.Info("DownloadFile:begin",
+	// 	zap.String("url", URL),
+	// 	zap.String("localPath", localPath),
+	// 	zap.String("time-start", strconv.FormatInt(timeStart, 10)))
 
 	_, err := os.Stat(localPath)
 

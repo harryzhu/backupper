@@ -24,4 +24,6 @@ var multidownloadCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(multidownloadCmd)
 	multidownloadCmd.Flags().IntVar(&BatchSize, "batch", 3, "--batch=3|5|10")
+	multidownloadCmd.Flags().BoolVar(&IsOverwrite, "overwrite", false, "--overwrite=false|true")
+
 }
