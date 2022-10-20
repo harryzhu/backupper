@@ -3,17 +3,19 @@ package cmd
 import (
 	"sqlconf"
 	//"fmt"
-	"io"
+	//"io"
 	//"io/ioutil"
-	"net/http"
+	//"net/http"
 	"net/url"
-	"os"
+	//"os"
 	"path/filepath"
 	"regexp"
-	"strconv"
+
+	//"strconv"
 	"strings"
 	"sync"
-	"time"
+
+	//"time"
 
 	//	"github.com/schollz/progressbar/v3"
 	"go.uber.org/zap"
@@ -80,80 +82,6 @@ func prepareURLFileList(URL string) error {
 	return nil
 }
 
-func DownloadFile(URL string, localPath string, withProgress bool) error {
-	timeStart := time.Now().Unix()
-
-	fi, err := os.Stat(localPath)
-
-	if err == nil {
-		if IsOverwrite == true {
-			if err = os.Remove(localPath); err != nil {
-				logger.Error("DownloadFile: error(os-remove)", zap.String("cannot delete file", localPath), zap.Error(err))
-			}
-		} else {
-			logger.Info("DownloadFile",
-				zap.String("action", "SKIP"),
-				zap.Bool("is-overwrite", IsOverwrite),
-				zap.Int64("size", fi.Size()),
-				zap.String("last-modified", fi.ModTime().String()),
-				zap.String("localPath", localPath),
-			)
-			return nil
-		}
-	}
-
-	resp, err := http.Get(URL)
-
-	if err != nil {
-		logger.Error("DownloadFile:error(http-get)", zap.Error(err))
-		return err
-	}
-	defer resp.Body.Close()
-
-	localPathTempName := strings.Join([]string{localPath, "downloading"}, ".")
-	fileTemp, err := os.Create(localPathTempName)
-	if err != nil {
-		logger.Error("DownloadFile:error(os-create)", zap.String("cannot create file", localPathTempName), zap.Error(err))
-		return err
-	}
-
-	defer fileTemp.Close()
-
-	if withProgress == true {
-		var contentLength int64 = -1
-		if resp.ContentLength > 0 {
-			contentLength = resp.ContentLength
-		}
-		bar := config.SetBar(contentLength, "downloading").Bar
-		_, err = io.Copy(io.MultiWriter(fileTemp, bar), resp.Body)
-		bar.Finish()
-	} else {
-		_, err = io.Copy(fileTemp, resp.Body)
-	}
-
-	if err != nil {
-		logger.Error("DownloadFile:error(io-copy)", zap.Error(err))
-		return err
-	}
-
-	fileTemp.Close()
-
-	err = os.Rename(localPathTempName, localPath)
-	if err != nil {
-		logger.Error("DownloadFile:error(os-rename)", zap.Error(err))
-		return err
-	}
-
-	timeStop := time.Now().Unix()
-
-	logger.Info("DownloadFile:ok",
-		zap.String("proto", resp.Proto),
-		zap.Int64("content-length", resp.ContentLength),
-		zap.String("duration", strconv.FormatInt(timeStop-timeStart, 10)))
-
-	return nil
-}
-
 func Filepathify(fp string) string {
 	var replacement string = "_"
 
@@ -185,7 +113,7 @@ func StartDownload() error {
 			continue
 		}
 
-		DownloadFile(u, f, true)
+		sqlconf.DownloadFile(u, f, IsOverwrite)
 	}
 
 	return nil
@@ -208,7 +136,7 @@ func StartMultiDownload() error {
 		logger.Info("start download", zap.String("url", u), zap.String("localPath", f))
 		wg.Add(1)
 		go func(u, f string) {
-			DownloadFile(u, f, false)
+			sqlconf.DownloadFile(u, f, IsOverwrite)
 			wg.Done()
 		}(u, f)
 
