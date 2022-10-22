@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"sqlconf"
+	"strconv"
+
 	//"fmt"
 	//"io"
 	//"io/ioutil"
@@ -9,7 +11,6 @@ import (
 	"net/url"
 	//"os"
 	"path/filepath"
-	"regexp"
 
 	//"strconv"
 	"strings"
@@ -44,7 +45,7 @@ func urlToSavePath(URL string) (savePath string) {
 	}
 
 	uPath := strings.ReplaceAll(u.Path, "\\", "/")
-	uPath2 := Filepathify(uPath)
+	uPath2 := sqlconf.Filepathify(uPath)
 
 	savePath = filepath.Join(DirSaveRoot, u_host, uPath2)
 	saveDir := filepath.Dir(savePath)
@@ -82,50 +83,34 @@ func prepareURLFileList(URL string) error {
 	return nil
 }
 
-func Filepathify(fp string) string {
-	var replacement string = "_"
-
-	reControlCharsRegex := regexp.MustCompile("[\u0000-\u001f\u0080-\u009f]")
-
-	reRelativePathRegex := regexp.MustCompile(`^\.+`)
-
-	filenameReservedRegex := regexp.MustCompile(`[<>:"\\|?*\x00-\x1F]`)
-	filenameReservedWindowsNamesRegex := regexp.MustCompile(`(?i)^(con|prn|aux|nul|com[0-9]|lpt[0-9])$`)
-
-	// reserved word
-	fp = filenameReservedRegex.ReplaceAllString(fp, replacement)
-
-	// continue
-	fp = reControlCharsRegex.ReplaceAllString(fp, replacement)
-	fp = reRelativePathRegex.ReplaceAllString(fp, replacement)
-	fp = filenameReservedWindowsNamesRegex.ReplaceAllString(fp, replacement)
-	return fp
-}
-
-func StartDownload() error {
+func runDownload() error {
 	if len(URLFileList) == 0 {
 		logger.Info("SKIP download", zap.String("StartDownload", "URLFileList is empty"))
 		return nil
 	}
-
+	var totalTasks int = 0
 	for u, f := range URLFileList {
 		if u == "" || f == "" {
 			continue
 		}
+		totalTasks += 1
+		p := strings.Join([]string{"downloading:[", strconv.Itoa(totalTasks), "/", strconv.Itoa(len(URLFileList)), "]"}, "")
 
-		sqlconf.DownloadFile(u, f, IsOverwrite)
+		sqlconf.DownloadFile(u, f, IsOverwrite, p)
 	}
 
 	return nil
 }
 
-func StartMultiDownload() error {
+func runMultiDownload() error {
 	if len(URLFileList) == 0 {
 		return nil
 	}
 
 	wg := sync.WaitGroup{}
 	var runningQueue int = 0
+	var totalTasks int = 0
+	var taskTitle string = ""
 
 	if len(URLFileList) <= BatchSize {
 		BatchSize = len(URLFileList)
@@ -133,12 +118,16 @@ func StartMultiDownload() error {
 	logger.Info("StartMultiDownload", zap.Int("batch-size", BatchSize), zap.Int("task-count", len(URLFileList)))
 
 	for u, f := range URLFileList {
-		logger.Info("start download", zap.String("url", u), zap.String("localPath", f))
 		wg.Add(1)
-		go func(u, f string) {
-			sqlconf.DownloadFile(u, f, IsOverwrite)
+		totalTasks += 1
+		taskTitle = strings.Join([]string{"downloading:[", strconv.Itoa(totalTasks), "/", strconv.Itoa(len(URLFileList)), "]"}, "")
+		//logger.Info(p, zap.String("url", u), zap.String("localPath", f))
+
+		go func(u, f, taskTitle string) {
+			sqlconf.DownloadFile(u, f, IsOverwrite, taskTitle)
+
 			wg.Done()
-		}(u, f)
+		}(u, f, taskTitle)
 
 		runningQueue++
 		if runningQueue >= BatchSize {

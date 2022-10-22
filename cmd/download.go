@@ -18,9 +18,9 @@ var downloadCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		if BatchSize > 1 {
-			StartMultiDownload()
+			runMultiDownload()
 		} else {
-			StartDownload()
+			runDownload()
 		}
 
 	},

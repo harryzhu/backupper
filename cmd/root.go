@@ -10,7 +10,7 @@ import (
 	//"io/ioutil"
 	"os"
 	//"path/filepath"
-	"strconv"
+	//"strconv"
 
 	//"strings"
 	"time"
@@ -22,6 +22,7 @@ import (
 var (
 	globalTimeStart int64
 	globalTimeStop  int64
+	AutoRunAlways   bool
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -30,10 +31,11 @@ var rootCmd = &cobra.Command{
 	Short: "A brief description of your application",
 	Long:  `-`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+
 		globalTimeStart = time.Now().Unix()
 		config.Refresh().Print()
 
-		logger.Info("===== start =====", zap.String("time", strconv.FormatInt(globalTimeStart, 10)))
+		logger.Info("===== start =====", zap.Int64("time", globalTimeStart))
 
 		prepareURLFileList(config.ToString("url_list"))
 
@@ -46,11 +48,13 @@ var rootCmd = &cobra.Command{
 	PersistentPostRun: func(cmd *cobra.Command, args []string) {
 		config.Close()
 
-		//config.AlwaysPostRun()
+		if AutoRunAlways == true {
+			config.AlwaysPostRun()
+		}
 
 		globalTimeStop = time.Now().Unix()
-		logger.Info("===== end(total duration) =====", zap.String("second", strconv.FormatInt(globalTimeStop-globalTimeStart, 10)))
-
+		logger.Info("===== end =====", zap.Int64("duration", globalTimeStop-globalTimeStart))
+		fmt.Println("***** END *****")
 	},
 }
 
@@ -64,6 +68,9 @@ func Execute() {
 }
 
 func init() {
+	rootCmd.PersistentFlags().BoolVar(&AutoRunAlways, "auto-run-always", false, "--auto-run-always=true|false")
+
+	fmt.Println("***** BEGIN *****")
 	bootConfig()
 
 	logger.Info("Thank you for choosing " + config.ToString("app_name"))
