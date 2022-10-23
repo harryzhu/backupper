@@ -37,8 +37,6 @@ var rootCmd = &cobra.Command{
 
 		logger.Info("===== start =====", zap.Int64("time", globalTimeStart))
 
-		prepareURLFileList(config.ToString("url_list"))
-
 		fmt.Println("======")
 		//fmt.Println(URLFileList)
 	},

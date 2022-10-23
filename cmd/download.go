@@ -8,6 +8,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	IsHttp2 bool
+)
+
 // downloadCmd represents the download command
 var downloadCmd = &cobra.Command{
 	Use:   "download",
@@ -15,6 +19,7 @@ var downloadCmd = &cobra.Command{
 	Long:  `-`,
 	PreRun: func(cmd *cobra.Command, args []string) {
 		config.RequiredKeys([]string{"url_list", "dir_save_root"})
+		prepareURLFileList(config.ToString("url_list"))
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		if BatchSize > 1 {
@@ -30,4 +35,5 @@ func init() {
 	rootCmd.AddCommand(downloadCmd)
 	downloadCmd.Flags().IntVar(&BatchSize, "batch", 1, "--batch=3|5|10")
 	downloadCmd.Flags().BoolVar(&IsOverwrite, "overwrite", false, "--overwrite=false|true")
+	downloadCmd.Flags().BoolVar(&IsHttp2, "http2", false, "--http2=false|true")
 }
