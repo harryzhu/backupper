@@ -19,7 +19,7 @@ var http2sCmd = &cobra.Command{
 		fmt.Println("http2 server called")
 		//var StaticRootDir string = "/Volumes/HDD4/downloads/"
 		h2s := config.SetH2Server().H2Server
-		h2s.WithStaticRootDir("/Volumes/HDD4/downloads/").WithAddress(":8080")
+		h2s.WithStaticRootDir("/Volumes/HDD4/downloads/").WithPort(8080)
 		h2s.WithTLS("../../../cert/cert.pem", "../../../cert/priv.key")
 		h2s.StartServer()
 	},
