@@ -18,9 +18,12 @@ var http2sCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("http2 server called")
 		//var StaticRootDir string = "/Volumes/HDD4/downloads/"
+
 		h2s := config.SetH2Server().H2Server
-		h2s.WithStaticRootDir("/Volumes/HDD4/downloads/").WithPort(8080)
-		h2s.WithTLS("../../../cert/cert.pem", "../../../cert/priv.key")
+		h2s.WithStaticRootDir(config.ToString("http2s_static_root_dir"))
+		h2s.WithIP("127.0.0.1")
+		h2s.WithPort(config.ToInt("http2s_port"))
+		h2s.WithTLS(config.ToString("http2s_tls_cert"), config.ToString("http2s_tls_key"))
 		h2s.StartServer()
 	},
 }
