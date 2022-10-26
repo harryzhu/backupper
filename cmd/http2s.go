@@ -35,6 +35,14 @@ var http2sCmd = &cobra.Command{
 		h2s.WithIP("127.0.0.1")
 		h2s.WithPort(config.ToInt("http2s_port"))
 		h2s.WithTLS(config.ToString("http2s_tls_cert"), config.ToString("http2s_tls_key"))
+
+		// control
+		h2s.EnableControl = config.ToBool("http2s_enable_control")
+
+		// proxy
+		h2s.EnableProxy = config.ToBool("http2s_enable_reverse_proxy")
+		h2s.ReverseProxyURL = config.ToString("http2s_reverse_proxy_url")
+
 		h2s.StartServer()
 	},
 }
