@@ -38,10 +38,9 @@ var rootCmd = &cobra.Command{
 		logger.Info("===== start =====", zap.Int64("time", globalTimeStart))
 
 		fmt.Println("======")
-		//fmt.Println(URLFileList)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		config.Refresh().Print()
+
 	},
 	PersistentPostRun: func(cmd *cobra.Command, args []string) {
 		config.Close()

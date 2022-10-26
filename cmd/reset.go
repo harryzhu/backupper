@@ -33,7 +33,7 @@ var resetCmd = &cobra.Command{
 	PreRun: func(cmd *cobra.Command, args []string) {
 		initConfig = make(map[string]string, 10)
 		// default config
-		initConfig["url_list"] = "http://localhost/download_v2.txt"
+		initConfig["url_list"] = "https://dla.harryzhu.plus/download_v2.txt"
 		initConfig["dir_save_root"] = "/Volumes/SSD2/temp/"
 
 	},
