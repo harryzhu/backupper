@@ -31,7 +31,6 @@ var rootCmd = &cobra.Command{
 	Short: "A brief description of your application",
 	Long:  `-`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-
 		globalTimeStart = time.Now().Unix()
 		config.Refresh().Print()
 
