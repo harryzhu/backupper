@@ -1,0 +1,23 @@
+#! --reset
+download_url_list = https://dla.harryzhu.plus:8080/download_v2.txt
+download_save_dir = /Volumes/SSD1T/temp
+		
+#http2s	
+http2s_ip = 127.0.0.1
+http2s_port = 8080
+http2s_static_root_dir = /Volumes/HDD4/downloads
+http2s_allow_ip_list = 
+http2s_block_ip_list = 
+http2s_default_allow = 1
+http2s_tls_cert = ../../../cert/dla.harryzhu.plus.pem
+http2s_tls_key = ../../../cert/dla.harryzhu.plus.key
+http2s_enable_control = 1
+http2s_enable_reverse_proxy = 1
+http2s_reverse_proxy_url = 
+
+#genlist
+genlist_root_dir = /Volumes/HDD4/downloads/New Folder With Items
+genlist_url_prefix = https://dla.harryzhu.plus:8080
+genlist_out_file = /Volumes/HDD4/downloads/download_v2.txt
+genlist_max_days = 70
+		

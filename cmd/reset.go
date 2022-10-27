@@ -6,18 +6,21 @@ package cmd
 
 import (
 	"fmt"
+	"io/ioutil"
 	"sqlconf"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
 
 var (
-	IsForce    bool
-	IsLocal    bool
-	initConfig map[string]string
-	config     *sqlconf.Conf
-	logger     *zap.Logger
+	IsForce     bool
+	IsLocal     bool
+	resetFile   string
+	resetConfig map[string]string
+	config      *sqlconf.Conf
+	logger      *zap.Logger
 )
 
 func bootConfig() {
@@ -33,62 +36,43 @@ var resetCmd = &cobra.Command{
 	Short: "A brief description of your command",
 	Long:  `-`,
 	PreRun: func(cmd *cobra.Command, args []string) {
-		initConfig = make(map[string]string, 10)
+		resetConfig = make(map[string]string, 10)
 		// default config
-		//download
-		if IsLocal {
-			initConfig["download_url_list"] = "https://dla.harryzhu.plus:8080/download_v2.txt"
-			initConfig["download_save_dir"] = "d:/backup/"
-		} else {
-			initConfig["download_url_list"] = "https://dla.harryzhu.plus:8080/download_v2.txt"
-			initConfig["download_save_dir"] = "./data"
+		resetFile = strings.Replace(config.DBFile, "conf.db", "reset.txt", 1)
+		rf, err := ioutil.ReadFile(resetFile)
+		if err != nil {
+			logger.Error("cannot read resetfile", zap.Error(err))
 		}
+		strrf := strings.ReplaceAll(string(rf), "\r\n", "\n")
+		lines := strings.Split(strrf, "\n")
+		var arrLine []string
+		key := ""
+		val := ""
+		for _, line := range lines {
+			line = strings.Trim(line, "\n")
+			line = strings.Trim(line, " ")
+			if line == "" || strings.Index(line, "#") == 0 || strings.Index(line, "=") <= 0 {
+				continue
+			}
+			arrLine = strings.Split(line, "=")
+			if len(arrLine) != 2 {
+				continue
+			}
+			key = strings.Trim(arrLine[0], " ")
+			val = strings.Trim(arrLine[1], " ")
+			if arrLine[0] == "" {
+				continue
+			}
+			resetConfig[key] = val
 
-		//http2s
-		if IsLocal {
-			initConfig["http2s_ip"] = "127.0.0.1"
-			initConfig["http2s_port"] = "8080"
-			initConfig["http2s_static_root_dir"] = "d:/static/"
-			initConfig["http2s_allow_ip_list"] = ""
-			initConfig["http2s_block_ip_list"] = ""
-			initConfig["http2s_default_allow"] = "1"
-			initConfig["http2s_tls_cert"] = "../../../cert/dla.harryzhu.plus.pem"
-			initConfig["http2s_tls_key"] = "../../../cert/dla.harryzhu.plus.key"
-			initConfig["http2s_enable_control"] = "1"
-			initConfig["http2s_enable_reverse_proxy"] = "1"
-			initConfig["http2s_reverse_proxy_url"] = ""
-		} else {
-			initConfig["http2s_ip"] = "0.0.0.0"
-			initConfig["http2s_port"] = "8080"
-			initConfig["http2s_static_root_dir"] = "./"
-			initConfig["http2s_allow_ip_list"] = ""
-			initConfig["http2s_block_ip_list"] = ""
-			initConfig["http2s_default_allow"] = "1"
-			initConfig["http2s_tls_cert"] = "../cert/dla.harryzhu.plus.pem"
-			initConfig["http2s_tls_key"] = "../cert/dla.harryzhu.plus.key"
-			initConfig["http2s_enable_control"] = "0"
-			initConfig["http2s_enable_reverse_proxy"] = "0"
-			initConfig["http2s_reverse_proxy_url"] = ""
-		}
-
-		// genlist
-		if IsLocal {
-			initConfig["genlist_root_dir"] = "d:/static/"
-			initConfig["genlist_url_prefix"] = "https://dla.harryzhu.plus:8080"
-			initConfig["genlist_out_file"] = "d:/static/download_v2.txt"
-			initConfig["genlist_max_days"] = "7"
-		} else {
-			initConfig["genlist_root_dir"] = "./"
-			initConfig["genlist_url_prefix"] = "https://dla.harryzhu.plus:8080"
-			initConfig["genlist_out_file"] = "./download_v2.txt"
-			initConfig["genlist_max_days"] = "3"
+			//fmt.Println(key, "=", val)
 		}
 
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("reset")
+		fmt.Println("reset, using", resetFile)
 		if IsForce == true {
-			config.LoadData(initConfig)
+			config.LoadData(resetConfig)
 			config.Refresh().Print()
 		}
 	},
