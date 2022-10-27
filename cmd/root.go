@@ -70,5 +70,5 @@ func init() {
 	bootConfig()
 
 	logger.Info("Thank you for choosing " + config.ToString("app_name"))
-	DirSaveRoot = config.ToString("dir_save_root")
+
 }

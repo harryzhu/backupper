@@ -32,7 +32,7 @@ var http2sCmd = &cobra.Command{
 			h2s.WithBlockIP(bip)
 		}
 		h2s.WithDefaultAllow(defaultallow)
-		h2s.WithIP("127.0.0.1")
+		h2s.WithIP(config.ToString("http2s_ip"))
 		h2s.WithPort(config.ToInt("http2s_port"))
 		h2s.WithTLS(config.ToString("http2s_tls_cert"), config.ToString("http2s_tls_key"))
 
