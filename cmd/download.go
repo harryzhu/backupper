@@ -18,10 +18,12 @@ var downloadCmd = &cobra.Command{
 	Short: "A brief description of your command",
 	Long:  `-`,
 	PreRun: func(cmd *cobra.Command, args []string) {
-		config.RequiredKeys([]string{"url_list", "dir_save_root"})
+		config.RequiredKeys([]string{"download_url_list", "download_save_dir"})
+		DownloadSaveDir = config.ToString("download_save_dir")
+
 		prepareURLFileList(config.ToString("download_url_list"))
 
-		DirSaveRoot = config.ToString("download_save_dir")
+		logger.Info("---" + DownloadSaveDir)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		if BatchSize > 1 {

@@ -40,7 +40,7 @@ var resetCmd = &cobra.Command{
 			initConfig["download_url_list"] = "https://dla.harryzhu.plus:8080/download_v2.txt"
 			initConfig["download_save_dir"] = "d:/backup/"
 		} else {
-			initConfig["download_url_list"] = "https://dla.harryzhu.plus/download_v2.txt"
+			initConfig["download_url_list"] = "https://dla.harryzhu.plus:8080/download_v2.txt"
 			initConfig["download_save_dir"] = "./data"
 		}
 
@@ -51,7 +51,7 @@ var resetCmd = &cobra.Command{
 			initConfig["http2s_static_root_dir"] = "d:/static/"
 			initConfig["http2s_allow_ip_list"] = ""
 			initConfig["http2s_block_ip_list"] = ""
-			initConfig["http2s_default_allow"] = ""
+			initConfig["http2s_default_allow"] = "1"
 			initConfig["http2s_tls_cert"] = "../../../cert/dla.harryzhu.plus.pem"
 			initConfig["http2s_tls_key"] = "../../../cert/dla.harryzhu.plus.key"
 			initConfig["http2s_enable_control"] = "1"
@@ -59,11 +59,11 @@ var resetCmd = &cobra.Command{
 			initConfig["http2s_reverse_proxy_url"] = ""
 		} else {
 			initConfig["http2s_ip"] = "0.0.0.0"
-			initConfig["http2s_port"] = "443"
+			initConfig["http2s_port"] = "8080"
 			initConfig["http2s_static_root_dir"] = "./"
 			initConfig["http2s_allow_ip_list"] = ""
 			initConfig["http2s_block_ip_list"] = ""
-			initConfig["http2s_default_allow"] = ""
+			initConfig["http2s_default_allow"] = "1"
 			initConfig["http2s_tls_cert"] = "../cert/dla.harryzhu.plus.pem"
 			initConfig["http2s_tls_key"] = "../cert/dla.harryzhu.plus.key"
 			initConfig["http2s_enable_control"] = "0"
@@ -76,10 +76,12 @@ var resetCmd = &cobra.Command{
 			initConfig["genlist_root_dir"] = "d:/static/"
 			initConfig["genlist_url_prefix"] = "https://dla.harryzhu.plus:8080"
 			initConfig["genlist_out_file"] = "d:/static/download_v2.txt"
+			initConfig["genlist_max_days"] = "7"
 		} else {
 			initConfig["genlist_root_dir"] = "./"
-			initConfig["genlist_url_prefix"] = "https://dla.harryzhu.plus"
+			initConfig["genlist_url_prefix"] = "https://dla.harryzhu.plus:8080"
 			initConfig["genlist_out_file"] = "./download_v2.txt"
+			initConfig["genlist_max_days"] = "3"
 		}
 
 	},

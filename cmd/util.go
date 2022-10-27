@@ -23,14 +23,14 @@ import (
 )
 
 var (
-	IsOverwrite bool
-	BatchSize   int = 3
-	DirSaveRoot string
-	URLFileList map[string]string = make(map[string]string, 10)
+	IsOverwrite     bool
+	BatchSize       int = 3
+	DownloadSaveDir string
+	URLFileList     map[string]string = make(map[string]string, 10)
 )
 
 func init() {
-	DirSaveRoot = strings.TrimRight(DirSaveRoot, "/")
+
 }
 
 func urlToSavePath(URL string) (savePath string) {
@@ -44,10 +44,15 @@ func urlToSavePath(URL string) (savePath string) {
 		u_host = strings.Split(u.Host, ":")[0]
 	}
 
+	DownloadSaveDir = strings.TrimRight(DownloadSaveDir, "/")
 	uPath := strings.ReplaceAll(u.Path, "\\", "/")
 	uPath2 := sqlconf.Filepathify(uPath)
 
-	savePath = filepath.Join(DirSaveRoot, u_host, uPath2)
+	if DownloadSaveDir == "" {
+		logger.Fatal("DownloadSaveDir cannot be empty")
+	}
+
+	savePath = filepath.Join(DownloadSaveDir, u_host, uPath2)
 	saveDir := filepath.Dir(savePath)
 
 	sqlconf.MakeDirs(saveDir)

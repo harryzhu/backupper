@@ -20,7 +20,8 @@ var genlistCmd = &cobra.Command{
 		//fmt.Println("genlist called")
 		sqlconf.GenFileListByDir(config.ToString("genlist_root_dir"),
 			config.ToString("genlist_url_prefix"),
-			config.ToString("genlist_out_file"))
+			config.ToString("genlist_out_file"),
+			config.ToInt64("genlist_max_days"))
 
 	},
 }
